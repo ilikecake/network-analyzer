@@ -1,12 +1,10 @@
 # Object files
+*.d
 *.o
 *.ko
-*.obj
-*.elf
 
 # Libraries
 *.lib
-*.a
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -18,6 +16,20 @@
 *.exe
 *.out
 *.app
-*.i*86
-*.x86_64
-*.hex
+
+# Binary files
+Debug/
+Release/
+*.axf
+*.map
+*.bin
+
+#Eclipse files
+/.metadata
+
+#Documentation
+*.html
+*.odt
+*.odt#
+
+
