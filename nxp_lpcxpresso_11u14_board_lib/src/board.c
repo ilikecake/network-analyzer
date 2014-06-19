@@ -36,12 +36,11 @@
  * Private types/enumerations/variables
  ****************************************************************************/
 
-#define LED1_GPIO_PORT_NUM			1
-#define LED1_GPIO_BIT_NUM			22
+#define LED1_GPIO_PORT_NUM			0
+#define LED1_GPIO_BIT_NUM			11
 #define LED2_GPIO_PORT_NUM			0
-#define LED2_GPIO_BIT_NUM			15
-#define LED3_GPIO_PORT_NUM			0
-#define LED3_GPIO_BIT_NUM			16
+#define LED2_GPIO_BIT_NUM			12
+
 
 
 
@@ -128,13 +127,13 @@ static void Board_LED_Init(void)
 {
 	/* Set the PIO_7 as output */
 	//MODIFIED
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 15, IOCON_FUNC1);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 16, IOCON_FUNC0);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 22, IOCON_FUNC0);
+	//Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 15, IOCON_FUNC1);
+	Chip_IOCON_PinMuxSet(LPC_IOCON, LED1_GPIO_PORT_NUM, LED1_GPIO_BIT_NUM, IOCON_FUNC1);
+	Chip_IOCON_PinMuxSet(LPC_IOCON, LED2_GPIO_PORT_NUM, LED2_GPIO_BIT_NUM, IOCON_FUNC1);
 
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, LED1_GPIO_PORT_NUM, LED1_GPIO_BIT_NUM);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, LED2_GPIO_PORT_NUM, LED2_GPIO_BIT_NUM);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, LED3_GPIO_PORT_NUM, LED3_GPIO_BIT_NUM);
+	//Chip_GPIO_SetPinDIROutput(LPC_GPIO, LED3_GPIO_PORT_NUM, LED3_GPIO_BIT_NUM);
 }
 
 /* Sets the state of a board LED to on or off */
@@ -148,10 +147,10 @@ void Board_LED_Set(uint8_t LEDNumber, bool On)
 	{
 		Chip_GPIO_SetPinState(LPC_GPIO, LED2_GPIO_PORT_NUM, LED2_GPIO_BIT_NUM, On);
 	}
-	else if(LEDNumber == 3)
+	/*else if(LEDNumber == 3)
 	{
 		Chip_GPIO_SetPinState(LPC_GPIO, LED3_GPIO_PORT_NUM, LED3_GPIO_BIT_NUM, On);
-	}
+	}*/
 }
 
 /* Returns the current state of a board LED */
@@ -165,10 +164,10 @@ bool Board_LED_Test(uint8_t LEDNumber)
 	{
 		return Chip_GPIO_GetPinState(LPC_GPIO, LED2_GPIO_PORT_NUM, LED2_GPIO_BIT_NUM);
 	}
-	else if(LEDNumber == 3)
+	/*else if(LEDNumber == 3)
 	{
 		return Chip_GPIO_GetPinState(LPC_GPIO, LED3_GPIO_PORT_NUM, LED3_GPIO_BIT_NUM);
-	}
+	}*/
 	return 0xFF;
 }
 
@@ -182,10 +181,10 @@ void Board_LED_Toggle(uint8_t LEDNumber)
 	{
 		Chip_GPIO_SetPinToggle(LPC_GPIO, LED2_GPIO_PORT_NUM, LED2_GPIO_BIT_NUM);
 	}
-	else if(LEDNumber == 3)
+	/*else if(LEDNumber == 3)
 	{
 		Chip_GPIO_SetPinToggle(LPC_GPIO, LED3_GPIO_PORT_NUM, LED3_GPIO_BIT_NUM);
-	}
+	}*/
 }
 
 /* Set up and initialize all required blocks and functions related to the

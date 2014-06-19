@@ -59,7 +59,10 @@ static void vLEDTask1(void *pvParameters) {
 
 	while (1) {
 		Board_LED_Set(1, LedState);
+		Board_LED_Set(2, !LedState);
 		LedState = (bool) !LedState;
+		printf("win");
+		//Board_UARTPutSTR("asdf");
 		vTaskDelay(configTICK_RATE_HZ*2);
 	}
 }
@@ -101,16 +104,16 @@ int main(void)
 {
 	//This function checks if the ISP is requested by the user
 	//To enter ISP, call RequestISP()
-	ReinvokeISP();
+	/*ReinvokeISP();
 
 	App_SetStatus(APP_STATUS_INIT);
-
+	*/
 	prvSetupHardware();
 
 	Board_LED_Set(1, 0);
 	Board_LED_Set(2, 1);
-	Board_LED_Set(3, 0);
-
+	//Board_LED_Set(3, 0);
+/*
 	i2c_app_init(I2C0, I2C_DEFAULT_SPEED);
 	App_SSP_Init();
 	App_Buzzer_Init();
@@ -134,25 +137,26 @@ int main(void)
 	if(App_GetStatus() == APP_STATUS_INIT)
 	{
 		App_SetStatus(APP_STATUS_OK);
-	}
+	}*/
 
 	/* LED1 toggle thread */
-	xTaskCreate(vLEDTask1, (signed char *) "vTaskLed1", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[0]);
+	xTaskCreate(vLEDTask1, (signed char *) "vTaskLed1", ( unsigned short )250, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[0]);
 
 	/* LED2 toggle thread */
-	xTaskCreate(vConsoleTask, (signed char *) "vConsole", ( unsigned short )300, NULL, (tskIDLE_PRIORITY + 1UL), &TaskList[1]);
+	//xTaskCreate(vConsoleTask, (signed char *) "vConsole", ( unsigned short )300, NULL, (tskIDLE_PRIORITY + 1UL), &TaskList[1]);
 
 	/* OLED Display Task */
-	xTaskCreate(DisplayTask, (signed char *) "vDisplay", ( unsigned short )250, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[2]);
+	//xTaskCreate(DisplayTask, (signed char *) "vDisplay", ( unsigned short )250, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[2]);
 
 	//Timer task
 	//This should be the highest priority task
-	xTaskCreate(TimerTask, (signed char *) "vTimer", ( unsigned short )150, NULL, (tskIDLE_PRIORITY + 4UL), &TaskList[3]);
+	//xTaskCreate(TimerTask, (signed char *) "vTimer", ( unsigned short )150, NULL, (tskIDLE_PRIORITY + 4UL), &TaskList[3]);
 
 	/* Start the scheduler */
 	vTaskStartScheduler();
 
 	/* Should never arrive here */
+	//while(1);
 	return 1;
 }
 

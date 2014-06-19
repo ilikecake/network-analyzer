@@ -68,8 +68,8 @@ extern "C" {
     is also the port used for Board_UARTPutChar, Board_UARTGetChar, and
 	Board_UARTPutSTR functions.
  */
-//#define DEBUG_UART LPC_USART
-#define DEBUG_USB
+#define DEBUG_UART LPC_USART
+//#define DEBUG_USB
 
 /**
  * @}
