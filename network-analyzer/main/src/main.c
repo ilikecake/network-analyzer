@@ -59,9 +59,9 @@ static void vLEDTask1(void *pvParameters) {
 
 	while (1) {
 		Board_LED_Set(1, LedState);
-		Board_LED_Set(2, !LedState);
+		//Board_LED_Set(2, !LedState);
 		LedState = (bool) !LedState;
-		printf("win");
+		//printf("win");
 		//Board_UARTPutSTR("asdf");
 		vTaskDelay(configTICK_RATE_HZ*2);
 	}
@@ -73,21 +73,24 @@ static void vConsoleTask(void *pvParameters)
 	uint32_t prompt = 0;
 	char DataFromUSB;
 
+	//TODO: Change the name of this queue later
+	xUSBCharReceived = xQueueCreate( 16, sizeof( portCHAR ) );
+
 	while (1)
 	{
-		if(prompt == 1)
-		{
+		//if(prompt == 1)
+		//{
 			//The task is suspended here until data is received from USB
 			xQueueReceive(xUSBCharReceived, &DataFromUSB, portMAX_DELAY);
 			CommandGetInputChar(DataFromUSB);
 			RunCommand();
-		}
+		//}
 
-		else if ((vcom_connected() != 0) && (prompt == 0))
+		/*else if ((vcom_connected() != 0) && (prompt == 0))
 		{
 			vcom_write((uint8_t *)"Console Active\r\n>", 17);
 			prompt = 1;
-		}
+		}*/
 	}
 }
 
@@ -143,7 +146,7 @@ int main(void)
 	xTaskCreate(vLEDTask1, (signed char *) "vTaskLed1", ( unsigned short )250, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[0]);
 
 	/* LED2 toggle thread */
-	//xTaskCreate(vConsoleTask, (signed char *) "vConsole", ( unsigned short )300, NULL, (tskIDLE_PRIORITY + 1UL), &TaskList[1]);
+	xTaskCreate(vConsoleTask, (signed char *) "vConsole", ( unsigned short )300, NULL, (tskIDLE_PRIORITY + 1UL), &TaskList[1]);
 
 	/* OLED Display Task */
 	//xTaskCreate(DisplayTask, (signed char *) "vDisplay", ( unsigned short )250, NULL, (tskIDLE_PRIORITY + 2UL), &TaskList[2]);

@@ -117,8 +117,12 @@ void Board_Debug_Init(void)
 	Chip_UART_Init(LPC_USART);
 	Chip_UART_SetBaud(LPC_USART, 115200);
 	Chip_UART_ConfigData(LPC_USART, (UART_LCR_WLEN8 | UART_LCR_SBS_1BIT));
-	Chip_UART_SetupFIFOS(LPC_USART, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV2));
+	Chip_UART_SetupFIFOS(LPC_USART, (UART_FCR_FIFO_EN | UART_FCR_TRG_LEV0));
 	Chip_UART_TXEnable(LPC_USART);
+
+	/* Set up UART for interrupt based receive */
+	Chip_UART_IntEnable(LPC_USART, UART_IER_RBRINT);
+	NVIC_EnableIRQ(UART0_IRQn);
 #endif
 }
 

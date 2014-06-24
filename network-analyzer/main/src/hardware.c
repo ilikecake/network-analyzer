@@ -421,3 +421,28 @@ void DEBOUNCE_TIMER_IRQ_HANDLER(void)
 
 	App_EnableButtons();
 }
+
+//#if defined(DEBUG_UART)
+void UART_IRQHandler(void)
+{
+	uint32_t UART_IntStatus;
+	uint8_t UART_RecieveByteVal;
+
+	Board_LED_Set(2, true);
+	Board_LED_Set(1, false);
+
+	UART_IntStatus = Chip_UART_ReadIntIDReg(LPC_USART);
+	if( (UART_IntStatus & 0x01) == 0x00)
+	{
+		if((UART_IntStatus & UART_IIR_INTID_MASK) == UART_IIR_INTID_RDA)
+		{
+			//TODO: Rename this queue later
+			UART_RecieveByteVal = Chip_UART_ReadByte(LPC_USART);
+			xQueueSendFromISR(xUSBCharReceived, &UART_RecieveByteVal, NULL);
+		}
+	}
+
+
+
+}
+//#endif
