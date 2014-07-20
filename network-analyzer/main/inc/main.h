@@ -33,13 +33,13 @@
 #include "commands.h"
 #include "i2c.h"
 #include "cdc_vcom.h"
-#include "ds3232m.h"
+//#include "ds3232m.h"
 #include "dfu.h"
-#include "NHD28.h"
+//#include "NHD28.h"
 #include "iap.h"
-#include "timer_task.h"
-#include "display_task.h"
-#include "sun.h"
+//#include "timer_task.h"
+//#include "display_task.h"
+//#include "sun.h"
 
 #include "EEPROM_24LC08B.h"
 

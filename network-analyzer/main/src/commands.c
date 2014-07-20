@@ -384,7 +384,7 @@ static int _F7_Handler (void)
 	uint16_t RHS;
 
 	//uint8_t i;
-	TimerEvent TestEvent;
+	//TimerEvent TestEvent;
 
 	unsigned int temp3[4];
 	cmd = argAsInt(1);
@@ -460,7 +460,7 @@ static int _F7_Handler (void)
 		//ReinvokeISP();
 		break;
 
-	case 7:
+	/*case 7:
 		printf("Writing to EEPROM...\r\n");
 		TestEvent.EventType = 0xA2;
 		TestEvent.EventOutputState = 0x01;
@@ -490,8 +490,9 @@ static int _F7_Handler (void)
 		printf("EventTime[0]: 0x%02X\r\n", TestEvent.EventTime[0]);
 		printf("EventTime[1]: 0x%02X\r\n", TestEvent.EventTime[1]);
 		printf("EventTime[2]: 0x%02X\r\n", TestEvent.EventTime[2]);
-		break;
+		break;*/
 
+		/*
 	case 9:
 		TimerReadEventsFromEEPROM();
 		break;
@@ -543,7 +544,7 @@ static int _F7_Handler (void)
 		//printf("LHS: %d\r\n", LHS);
 		//printf("RHS: %d\r\n", RHS);
 
-		break;
+		break;*/
 
 	}
 
@@ -555,7 +556,9 @@ static int _F8_Handler (void)
 {
 	uint8_t cmd;
 	cmd = argAsInt(1);
-	TimerEvent NewTimerEvent;
+	//TimerEvent NewTimerEvent;
+
+	/*
 
 	struct tm CurrentTime;
 	//TimeAndDate CurrentTime;
@@ -597,7 +600,7 @@ static int _F8_Handler (void)
 
 
 	}
-
+*/
 	return 0;
 }
 
@@ -606,7 +609,7 @@ static int _F9_Handler (void)
 	uint8_t cmd;
 	uint8_t i,j;
 
-	TimerEvent EventData;
+	/*TimerEvent EventData;
 
 	char LineChar[] = "-----------------------------------------------\r\n";
 
@@ -711,7 +714,7 @@ static int _F9_Handler (void)
 
 	}
 
-
+*/
 
 
 

@@ -397,7 +397,7 @@ void App_DisableButtons(void)
  */
 void App_HandleButtonPress(void)
 {
-	if(App_GetStatus() != APP_STATUS_INIT)
+	/*if(App_GetStatus() != APP_STATUS_INIT)
 	{
 		DisplayCommand CommandToSend;
 
@@ -415,7 +415,7 @@ void App_HandleButtonPress(void)
 	else
 	{
 		App_EnableButtons();
-	}
+	}*/
 	return;
 }
 
@@ -497,7 +497,7 @@ void App_InitializeFromEEPROM(void)
 
 
 	//Read status of the timer and set up the device
-	if( EEPROM_Read(EEPROM_ADDRESS_TIMER_STATUS, &StatusReg, 1 ) != 0)
+	/*if( EEPROM_Read(EEPROM_ADDRESS_TIMER_STATUS, &StatusReg, 1 ) != 0)
 	{
 		App_Die(8);
 	}
@@ -520,7 +520,7 @@ void App_InitializeFromEEPROM(void)
 	OLED_DisplayRotation(StatusReg & OLED_STATUS_ORENTATION_MASK);
 
 
-
+*/
 
 
 	return;
