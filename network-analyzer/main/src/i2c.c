@@ -39,58 +39,7 @@
 
 #include "main.h"
 
-//#include <stdlib.h>
-//#include <string.h>
-//#include "board.h"
-
-/*****************************************************************************
- * Private types/enumerations/variables
- ****************************************************************************/
-
-//#define DEFAULT_I2C          I2C0
-//
-//#define I2C_EEPROM_BUS       DEFAULT_I2C
-//#define I2C_IOX_BUS          DEFAULT_I2C
-//
-//#define SPEED_100KHZ         100000
-//#define SPEED_400KHZ         400000
-//#define I2C_DEFAULT_SPEED    SPEED_100KHZ
-//#define I2C_FASTPLUS_BIT     0
-//
-//#if (I2C_DEFAULT_SPEED > SPEED_400KHZ)
-//#undef  I2C_FASTPLUS_BIT
-//#define I2C_FASTPLUS_BIT IOCON_FASTI2C_EN
-//#endif
-//
-////#ifdef DEBUG_ENABLE
-////static const char menu[] =
-////	"**************** I2C Demo Menu ****************\r\n"
-////	"\t0: Exit Demo\r\n"
-////	"\t1: Select I2C peripheral [\033[1;32mI2C%d\033[0;37m]\r\n"
-////	"\t2: Toggle mode POLLING/INTERRUPT [\033[1;32m%s\033[0;37m]\r\n"
-////	"\t3: Probe for Slave devices\r\n"
-////	"\t4: Read slave data\r\n"
-////	"\t5: Write slave data\r\n"
-////	"\t6: Write/Read slave data\r\n";
-////#endif
-//
 static int mode_poll;	/* Poll/Interrupt mode flag */
-//static I2C_ID_T i2cDev = DEFAULT_I2C;	/* Currently active I2C device */
-
-/* EEPROM SLAVE data */
-//#define I2C_SLAVE_EEPROM_SIZE       64
-//#define I2C_SLAVE_EEPROM_ADDR       0x5A
-//#define I2C_SLAVE_IOX_ADDR          0x5B
-
-///* Xfer structure for slave operations */
-//static I2C_XFER_T seep_xfer;
-//static I2C_XFER_T iox_xfer;
-//
-///* Data area for slave operations */
-//static uint8_t seep_data[I2C_SLAVE_EEPROM_SIZE + 1];
-//static uint8_t buffer[2][256];
-//static uint8_t iox_data[2];	/* PORT0 input port, PORT1 Output port */
-//static volatile uint32_t tick_cnt;
 
 /*****************************************************************************
  * Public types/enumerations/variables
@@ -102,17 +51,9 @@ static int mode_poll;	/* Poll/Interrupt mode flag */
 
 static void Init_I2C_PinMux(void)
 {
-#if (defined(BOARD_NXP_XPRESSO_11U14) || defined(BOARD_NGX_BLUEBOARD_11U24))
 	Chip_SYSCTL_PeriphReset(RESET_I2C0);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 4, IOCON_FUNC1 | I2C_FASTPLUS_BIT);
 	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 5, IOCON_FUNC1 | I2C_FASTPLUS_BIT);
-#elif (defined(BOARD_NXP_XPRESSO_11C24) || defined(BOARD_MCORE48_1125))
-	Chip_SYSCTL_PeriphReset(RESET_I2C0);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIO0_4, IOCON_FUNC1 | I2C_FASTPLUS_BIT);
-	Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIO0_5, IOCON_FUNC1 | I2C_FASTPLUS_BIT);
-#else
-	#error "No Pin Muxing defined for I2C operation"
-#endif
 }
 
 /* State machine handler for I2C0 and I2C1 */

@@ -73,25 +73,36 @@ static void vConsoleTask(void *pvParameters)
 	uint32_t prompt = 0;
 	char DataFromUSB;
 
+
 	//TODO: Change the name of this queue later
 	xUSBCharReceived = xQueueCreate( 16, sizeof( portCHAR ) );
 
 	while (1)
 	{
-		//if(prompt == 1)
-		//{
+		xQueueReceive(xUSBCharReceived, &DataFromUSB, portMAX_DELAY);
+		CommandGetInputChar(DataFromUSB);
+		RunCommand();
+	}
+
+
+
+	/*while (1)
+	{
+		if(prompt == 1)
+		{
 			//The task is suspended here until data is received from USB
 			xQueueReceive(xUSBCharReceived, &DataFromUSB, portMAX_DELAY);
 			CommandGetInputChar(DataFromUSB);
 			RunCommand();
-		//}
+		}
 
-		/*else if ((vcom_connected() != 0) && (prompt == 0))
+		else if ((vcom_connected() != 0) && (prompt == 0))
 		{
 			vcom_write((uint8_t *)"Console Active\r\n>", 17);
 			prompt = 1;
-		}*/
-	}
+		}
+	}*/
+
 }
 
 
@@ -112,9 +123,17 @@ int main(void)
 	App_SetStatus(APP_STATUS_INIT);
 	*/
 	prvSetupHardware();
+	App_HWInit();
+
+	i2c_app_init(I2C0, I2C_DEFAULT_SPEED);
+
 
 	Board_LED_Set(1, 0);
 	Board_LED_Set(2, 1);
+
+
+	vcom_init();
+
 	//Board_LED_Set(3, 0);
 /*
 	i2c_app_init(I2C0, I2C_DEFAULT_SPEED);

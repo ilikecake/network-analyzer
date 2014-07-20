@@ -72,6 +72,225 @@ void App_SSP_Init (void)
 	return;
 }
 
+void App_HWInit(void)
+{
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 2, IOCON_FUNC0);			//Setup pin 0.2 for GPIO as EEPROM connect
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 23, IOCON_FUNC0);		//Set pin 1.23 for GPIO as EEPROM Write Protect
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 21, IOCON_FUNC0);		//Set pin 0.21 for GPIO as USB hub reset
+
+	return;
+}
+
+void App_USBEEPROM_Connect(uint8_t toConnect)
+{
+
+	if(toConnect == 1)
+	{
+		Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 2);
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, 2);
+	}
+	else
+	{
+		//An external pullup resistor pulls the line high to disconnect the USB EEPROM bus from the CPU EEPROM bus
+		Chip_GPIO_SetPinDIRInput(LPC_GPIO, 0, 2);
+	}
+	return;
+}
+
+void App_USBEEPROM_WP(uint8_t WPState)
+{
+
+	if(WPState == 0)
+	{
+		Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 23);
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, 1, 23);
+	}
+	else
+	{
+		//An external pullup resistor pulls the line high to write protect the USB EEPROM
+		Chip_GPIO_SetPinDIRInput(LPC_GPIO, 1, 23);
+	}
+	return;
+}
+
+void App_USBHUB_Reset(uint8_t ToReset)
+{
+	if(ToReset == 1)
+	{
+		//Low to reset the USB hub
+		Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 21);
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, 0, 21);
+	}
+	else
+	{
+		//An external pullup resistor pulls the line high to unreset the hub
+		Chip_GPIO_SetPinDIRInput(LPC_GPIO, 0, 21);
+	}
+	return;
+}
+
+int16_t App_USBEEPROM_Init_Program(void)
+{
+	//Program the initial values to the USB EEPROM
+	//This should only need to be called once
+
+	uint8_t j;
+	int16_t i;
+	uint8_t ReadByte;
+	uint8_t USB_EEPROM_InitData[17] = {0x24, 0x04, 0x12, 0x25, 0xB3, 0x0B, 0x1B, 0x20, 0x02, 0x00, 0x00, 0x00, 0x01, 0x32, 0x01, 0x32, 0x32};
+
+
+	for(j=0;j<4;j++)
+	{
+
+		App_USBHUB_Reset(1);		//Reset the hub to free up the I2C interface
+		App_USBEEPROM_WP(0);		//Turn off the write protect on the EEPROM chip
+		App_USBEEPROM_Connect(1);	//Connect the chip I2C bus to the EEPROM chip
+
+		//Initialize the entire EEPROM bank to zero
+		for(i=0; i<0xFF; i++)
+		{
+			EEPROM_24LV08B_WriteByte(j, i, 0x00);
+			EEPROM_24LV08B_WaitReady();
+		}
+
+		for(i=0; i<0xFF; i++)
+		{
+			EEPROM_24LV08B_ReadByte(j, i, &ReadByte);
+			if(ReadByte != 0x00)
+			{
+				//Error when clearing EEPROM
+				printf("Error clearing EEPROM");
+				return i;
+			}
+		}
+
+		//Write initial values to the relevant addresses
+		for(i=0;i<17;i++)
+		{
+			EEPROM_24LV08B_WriteByte(j, i, (~USB_EEPROM_InitData[i]));
+			EEPROM_24LV08B_WaitReady();
+		}
+
+		//Verify the initial values in EEPROM
+		for(i=0;i<17;i++)
+		{
+			EEPROM_24LV08B_ReadByte(j, i, &ReadByte);
+			if(ReadByte != ((~USB_EEPROM_InitData[i])& 0xFF) )
+			{
+				//Error writing initial values to EEPROM
+				printf("Incorrect data at address 0x%02X, read 0x%02X, expected 0x%02X\r\n", i, ReadByte, ((~USB_EEPROM_InitData[i])& 0xFF));
+				return i;
+			}
+		}
+
+		//Write other values
+		EEPROM_24LV08B_WriteByte(j, 0xFA, (0x06));
+		EEPROM_24LV08B_WaitReady();
+		EEPROM_24LV08B_ReadByte(j, 0xFA, &ReadByte);
+		if(ReadByte != (0x06))
+		{
+			//Error writing inital values to EEPROM
+			printf("Incorrect data at address 0xFA, read 0x%02X, expected 0x%02X\r\n", ReadByte, (0x06));
+			return 0xFA;
+		}
+
+		App_USBEEPROM_Connect(0);
+		App_USBEEPROM_WP(1);
+		App_USBHUB_Reset(0);
+
+	}
+
+	return -1;
+}
+
+
+
+
+
+
+uint8_t App_USBEEPROM_ProgramByte(uint8_t AddressToProgram, uint8_t ByteToWrite)
+{
+	uint8_t ReadByte;
+
+	App_USBHUB_Reset(1);		//Reset the hub to free up the I2C interface
+	App_USBEEPROM_WP(0);		//Turn off the write protect on the EEPROM chip
+	App_USBEEPROM_Connect(1);	//Connect the chip I2C bus to the EEPROM chip
+
+	//Write the byte to the EEPROM
+	EEPROM_24LV08B_WriteByte(0, AddressToProgram, ByteToWrite);
+	EEPROM_24LV08B_WaitReady();
+
+	//Verify the byte has been written
+	EEPROM_24LV08B_ReadByte(0, AddressToProgram, &ReadByte);
+	if(ReadByte != ByteToWrite)
+	{
+		return 0xFF;	//Error writing to the EEPROM (TODO: make it retry?)
+	}
+
+	//Disconnect from the EEPROM and renable the USB hub
+	App_USBEEPROM_Connect(0);
+	App_USBEEPROM_WP(1);
+	App_USBHUB_Reset(0);
+
+	return 0x00;
+}
+
+
+
+
+uint8_t App_USBEEPROM_ReadByte(uint8_t AddressToRead)
+{
+	uint8_t ReadByte;
+
+	App_USBHUB_Reset(1);		//Reset the hub to free up the I2C interface
+	App_USBEEPROM_WP(0);		//Turn off the write protect on the EEPROM chip
+	App_USBEEPROM_Connect(1);	//Connect the chip I2C bus to the EEPROM chip
+
+	EEPROM_24LV08B_ReadByte(0, AddressToRead, &ReadByte);
+
+	App_USBEEPROM_Connect(0);
+	App_USBEEPROM_WP(1);
+	App_USBHUB_Reset(0);
+
+	return ReadByte;
+}
+
+
+
+uint8_t App_USBEEPROM_Program(uint8_t StartAddress, uint8_t BytesToWrite, uint8_t *DataArray)
+{
+	uint8_t i;
+	uint8_t ReadByte;
+
+	App_USBHUB_Reset(1);		//Reset the hub to free up the I2C interface
+	App_USBEEPROM_WP(0);		//Turn off the write protect on the EEPROM chip
+	App_USBEEPROM_Connect(1);	//Connect the chip I2C bus to the EEPROM chip
+
+	for(i=0; i<BytesToWrite; i++)
+	{
+		EEPROM_24LV08B_WriteByte(0, i, DataArray[i]);
+		EEPROM_24LV08B_WaitReady();
+	}
+
+	for(i=0; i<BytesToWrite; i++)
+	{
+		EEPROM_24LV08B_ReadByte(0, i, &ReadByte);
+		if(ReadByte != DataArray[i])
+		{
+			return i;
+		}
+	}
+
+	App_USBEEPROM_Connect(0);
+	App_USBEEPROM_WP(1);
+	App_USBHUB_Reset(0);
+
+	//Return 0xFF if it worked
+	return 0xFF;
+}
+
+
 void App_Button_Init(void)
 {
 	ButtonWaiting = 0;
@@ -307,108 +526,6 @@ void App_InitializeFromEEPROM(void)
 	return;
 }
 
-void App_Buzzer_Init(void)
-{
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 17, IOCON_FUNC0);		//Set the buzz pin to GPIO
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 17);					//Set the buzz pin to output
-	Chip_GPIO_SetPinState(LPC_GPIO, 0, 17, 0);					//Set the buzz pin low
-
-	//Initialize the timer for the buzzer, but don't start it
-	Chip_TIMER_Init(BUZZ_TIMER);
-	Chip_TIMER_Reset(BUZZ_TIMER);
-
-	BUZZ_TIMER->MCR = (1<<1)|(1<<0);		//Enable MR0 match interrupt, Reset TC on MR0 match
-	BUZZ_TIMER->MR[0]= 12000;				//MR0 match value
-
-	//Enable the IRQ for the timer
-	NVIC_EnableIRQ(BUZZ_TIMER_NVIC_NAME);
-
-	return;
-}
-
-void App_Buzzer_on (void)
-{
-	BUZZ_TIMER->TCR = 0x01;
-	return;
-}
-
-void App_Buzzer_off (void)
-{
-	BUZZ_TIMER->TCR = 0x00;
-	Chip_TIMER_Reset(BUZZ_TIMER);
-	BUZZ_TIMER->IR = 0xFF;
-	return;
-}
-
-void App_Die(uint8_t ErrorCode)
-{
-	char ErrorString[11];
-	uint8_t i;
-	MF_StringOptions StringOptions;
-
-	StringOptions.CharSize = MF_ASCII_SIZE_7X8;
-	StringOptions.StartPadding = 0;
-	StringOptions.EndPadding = 0;
-	StringOptions.TopPadding = 0;
-	StringOptions.BottomPadding = 0;
-	StringOptions.CharacterSpacing = 0;
-	StringOptions.Brightness = 0x0F;
-	StringOptions.FontOptions = OLED_FONT_NORMAL;
-
-	//Turn off all IRQs
-	for(i=0;i<32;i++)
-	{
-		NVIC_DisableIRQ(i);
-	}
-
-	OLED_ClearDisplay();
-
-	//sprintf(ErrorString, "Error: %03u", ErrorCode);
-
-
-
-	strcpy(ErrorString, "ERROR: ");
-	if(ErrorCode > 99)
-	{
-		ErrorString[7] = (char)((ErrorCode/100)+48);
-		ErrorString[8] = (char)(((ErrorCode/10)%10)+48);
-		ErrorString[9] = (char)((ErrorCode%10)+48);
-		ErrorString[10] = '\0';
-	}
-	else if(ErrorCode > 9)
-	{
-		ErrorString[7] = (char)((ErrorCode/10)+48);
-		ErrorString[8] = (char)((ErrorCode%10)+48);
-		ErrorString[9] = '\0';
-	}
-	else
-	{
-		ErrorString[7] = (char)(ErrorCode+48);
-		ErrorString[8] = '\0';
-	}
-	//if(ErrorCode > 100)
-	//{
-	//	ErrorString[] = (char)(ErrorCode/100);
-	//}
-
-
-
-
-	//strcat(ErrorString, (char *)(ErrorCode+48) );
-	//ErrorString = "ASDDFg";
-	StringOptions.XStart = 0;
-	StringOptions.YStart = 20;
-	OLED_WriteMFString(ErrorString, &StringOptions);
-
-	while(1);
-}
-
-void BUZZ_TIMER_IRQ_HANDLER(void)
-{
-	BUZZ_TIMER->IR = 0xFF;
-	Chip_GPIO_SetPinToggle(LPC_GPIO, 0, 17);
-}
-
 void DEBOUNCE_TIMER_IRQ_HANDLER(void)
 {
 	//Reenable buttons
@@ -441,8 +558,5 @@ void UART_IRQHandler(void)
 			xQueueSendFromISR(xUSBCharReceived, &UART_RecieveByteVal, NULL);
 		}
 	}
-
-
-
 }
 //#endif

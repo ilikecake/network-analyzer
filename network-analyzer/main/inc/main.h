@@ -41,6 +41,8 @@
 #include "display_task.h"
 #include "sun.h"
 
+#include "EEPROM_24LC08B.h"
+
 
 //#define ERROR_CODE_1			1
 //#define ERROR_CODE_2			2

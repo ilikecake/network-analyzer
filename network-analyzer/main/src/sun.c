@@ -96,25 +96,25 @@ void SetLongitude(int16_t LHS, uint16_t RHS)
 /** Read Latitude from EEPROM */
 void GetLatitude(int16_t *LHS, uint16_t *RHS)
 {
-	if( EEPROM_Read(EEPROM_ADDRESS_LAT_LHS_MSB, LHS, 2 ) !=0)
+	/*if( EEPROM_Read(EEPROM_ADDRESS_LAT_LHS_MSB, LHS, 2 ) !=0)
 	{
 		//Failed to write to EEPROM
-		App_Die(8);
+		//App_Die(8);
 	}
 
 	//Save new value in EEPROM
 	if( EEPROM_Read(EEPROM_ADDRESS_LAT_RHS_MSB, RHS, 2 ) !=0)
 	{
 		//Failed to write to EEPROM
-		App_Die(8);
-	}
+		//App_Die(8);
+	}*/
 	return;
 }
 
 /** Read Longitude from EEPROM */
 void GetLongitude(int16_t *LHS, uint16_t *RHS)
 {
-	if( EEPROM_Read(EEPROM_ADDRESS_LONG_LHS_MSB, LHS, 2 ) !=0)
+	/*if( EEPROM_Read(EEPROM_ADDRESS_LONG_LHS_MSB, LHS, 2 ) !=0)
 	{
 		//Failed to write to EEPROM
 		App_Die(8);
@@ -125,7 +125,7 @@ void GetLongitude(int16_t *LHS, uint16_t *RHS)
 	{
 		//Failed to write to EEPROM
 		App_Die(8);
-	}
+	}*/
 	return;
 }
 
