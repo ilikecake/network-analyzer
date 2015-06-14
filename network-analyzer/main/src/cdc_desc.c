@@ -81,7 +81,7 @@ ALIGNED(4) uint8_t USB_FsConfigDescriptor[] = {
 	0x01,									/* bConfigurationValue */
 	0x00,									/* iConfiguration */
 	USB_CONFIG_SELF_POWERED,				/* bmAttributes  */
-	USB_CONFIG_POWER_MA(500),				/* bMaxPower */
+	USB_CONFIG_POWER_MA(100),				/* bMaxPower */
 
 	/* Interface association descriptor IAD*/
 	USB_INTERFACE_ASSOC_DESC_SIZE,		/* bLength */

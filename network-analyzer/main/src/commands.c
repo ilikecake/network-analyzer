@@ -203,31 +203,6 @@ static int _F2_Handler (void)
 		printf("Free Heap Space: %u\r\n", xPortGetFreeHeapSize());
 
 		printf("Compile Time: %s, %s\r\n", __DATE__, __TIME__);
-
-		//printf("EEPROM Settings:\r\n", __DATE__, __TIME__);
-
-		//Read status of the timer
-		/*if( EEPROM_Read(EEPROM_ADDRESS_TIMER_STATUS, &resp, 1 ) != 0)
-		{
-			App_Die(8);
-		}
-
-		printf("Timer: 0x%02X\r\n", resp);
-
-		//Read status of the display
-		if( EEPROM_Read(EEPROM_ADDRESS_DISPLAY_STATUS, &resp, 1 ) != 0)
-		{
-			App_Die(8);
-		}
-
-		printf("Display: 0x%02X\r\n", resp);*/
-
-
-
-
-
-
-
 	}
 
 	return 0;
@@ -241,7 +216,7 @@ static int _F3_Handler (void)
 	return 0;
 }
 
-//Timer functions
+//uep
 static int _F4_Handler (void)
 {
 	uint8_t val;
@@ -249,7 +224,7 @@ static int _F4_Handler (void)
 	uint8_t val3;
 
 	uint8_t USB_EEPROM_InitData[17] = {0x24, 0x04, 0x12, 0x25, 0xB3, 0x0B, 0x1B, 0x20, 0x02, 0x00, 0x00, 0x00, 0x01, 0x32, 0x01, 0x32, 0x32};
-	uint8_t i;
+	int16_t i;
 	uint8_t ReadByte;
 	//uint8_t val4;
 
@@ -260,22 +235,40 @@ static int _F4_Handler (void)
 	{
 		case 1:
 			App_USBEEPROM_Connect(val);
+			if(val == 1)
+			{
+				printf("USB EEPROM connected to I2C bus.\r\n");
+			}
+			else
+			{
+				printf("USB EEPROM disconnected from I2C bus.\r\n");
+			}
+
 			break;
 
 		case 2:
 			App_USBEEPROM_WP(val);
+			if(val == 1)
+			{
+				printf("USB EEPROM write protected.\r\n");
+			}
+			else
+			{
+				printf("USB EEPROM writable.\r\n");
+			}
 			break;
 
 		case 3:
 			val2 = argAsInt(3);
 			val3 = argAsInt(4);
 			EEPROM_24LV08B_WriteByte(val, val2, val3);
+			printf("Write 0x%02X to block 0x%02X, address 0x%02X\r\n", val3, val, val2);
 			break;
 
 		case 4:
 			val2 = argAsInt(3);
 			EEPROM_24LV08B_ReadByte(val, val2, &val3);
-			printf("Read 0x%02X\r\n", val3);
+			printf("Read 0x%02X from block 0x%02X, address 0x%02X\r\n", val3, val, val2);
 			break;
 
 		case 5:
@@ -310,6 +303,48 @@ static int _F4_Handler (void)
 			{
 				printf("Error %d.\r\n", i);
 			}
+
+		case 7:
+			App_Analog_Power_Enable(val);
+			if(val == 1)
+			{
+				printf("Analog Power On\r\n");
+			}
+			else
+			{
+				printf("Analog Power Off\r\n");
+			}
+
+			break;
+
+		case 8:
+			App_ADG804_Enable(val);
+			if(val == 1)
+			{
+				printf("Mux Enabled (high)\r\n");
+			}
+			else
+			{
+				printf("Mux Disabled (low)\r\n");
+			}
+
+			break;
+
+		case 9:
+			App_ADG804_SetAddress(val);
+			if((val >= 0) && (val < 4))
+			{
+				printf("Address set to %d\r\n", val);
+			}
+			else
+			{
+				printf("Invalid address\r\n");
+			}
+			break;
+
+
+
+
 	}
 
 	return 0;

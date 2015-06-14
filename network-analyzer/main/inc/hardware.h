@@ -22,6 +22,11 @@ void App_SSP_Init (void);
 
 void App_HWInit(void);
 
+void App_Analog_Power_Enable(uint8_t toEnable);
+
+void App_ADG804_Enable(uint8_t toEnable);
+void App_ADG804_SetAddress(uint8_t AddressToSet);
+
 void App_USBEEPROM_Connect(uint8_t toConnect);
 void App_USBEEPROM_WP(uint8_t WPState);
 
