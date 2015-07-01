@@ -42,6 +42,7 @@
 //#include "sun.h"
 
 #include "EEPROM_24LC08B.h"
+#include "AD5933.h"
 
 
 //#define ERROR_CODE_1			1

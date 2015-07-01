@@ -79,9 +79,9 @@ const char _F7_HELPTEXT[] 		= "eeprom <1> <2>";
 
 //Timer functions
 static int _F8_Handler (void);
-const char _F8_NAME[]			= "timer";
-const char _F8_DESCRIPTION[] 	= "Timer functions";
-const char _F8_HELPTEXT[] 		= "timer <1>";
+const char _F8_NAME[]			= "adc";
+const char _F8_DESCRIPTION[] 	= "AD5933 Diagnostic Functions";
+const char _F8_HELPTEXT[] 		= "adc <1>";
 
 //List or update events
 static int _F9_Handler (void);
@@ -120,7 +120,7 @@ const CommandListItem AppCommandList[] =
 	{ _F5_NAME, 	1,  2,	_F5_Handler,	_F5_DESCRIPTION,	_F5_HELPTEXT	},		//prog
 	{ _F6_NAME, 	0,  1,	_F6_Handler,	_F6_DESCRIPTION,	_F6_HELPTEXT	},		//beep
 	{ _F7_NAME, 	2,  2,	_F7_Handler,	_F7_DESCRIPTION,	_F7_HELPTEXT	},		//eeprom
-	{ _F8_NAME,		1,  1,	_F8_Handler,	_F8_DESCRIPTION,	_F8_HELPTEXT	},		//timer
+	{ _F8_NAME,		1,  3,	_F8_Handler,	_F8_DESCRIPTION,	_F8_HELPTEXT	},		//timer
 	{ _F9_NAME,		1,  8,	_F9_Handler,	_F9_DESCRIPTION,	_F9_HELPTEXT	},		//event
 
 	/*
@@ -586,56 +586,162 @@ static int _F7_Handler (void)
 	return 0;
 }
 
-//Timer Functions
+//adc
 static int _F8_Handler (void)
 {
 	uint8_t cmd;
+	uint8_t dat;
+	uint32_t tempvar;
 	cmd = argAsInt(1);
-	//TimerEvent NewTimerEvent;
-
-	/*
-
-	struct tm CurrentTime;
-	//TimeAndDate CurrentTime;
-
-
-	DS3232M_GetTime(&CurrentTime);
-
-	printf("Start Out: 0x%02X\r\n", TimerGetOutputState());
 
 	switch (cmd)
 	{
 		case 1:
 			//TimerTask();
-			printf("Out: 0x%02X\r\n", TimerGetOutputState());
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_ReadReg(argAsInt(2), &dat);
+				printf("Reg[0x%02X]: 0x%02X\r\n", argAsInt(2), dat);
+			}
 			break;
 
 		case 2:
-			NewTimerEvent.EventType = TIMER_EVENT_TYPE_TIMED;
-			NewTimerEvent.EventTime[0] = 0xFF;	//Trigger on all days of week
-			NewTimerEvent.EventTime[1] = CurrentTime.tm_hour;
-			NewTimerEvent.EventTime[2] = CurrentTime.tm_min+1;
-			NewTimerEvent.EventOutputState = 1;
-			TimerSetEvent(1, 1, &NewTimerEvent);
-
-			NewTimerEvent.EventTime[2] = CurrentTime.tm_min+2;
-			NewTimerEvent.EventOutputState = 0;
-			TimerSetEvent(1, 2, &NewTimerEvent);
-
+			//TimerTask();
+			if(NumberOfArguments() > 2)
+			{
+				AD5933_WriteReg(argAsInt(2), argAsInt(3));
+				printf("Write 0x%02X to register 0x%02X\r\n", argAsInt(3), argAsInt(2));
+			}
 			break;
 
 		case 3:
-			TimerGetEvent(1, 1, &NewTimerEvent);
-			printf("type: %u\r\n", NewTimerEvent.EventType);
-			printf("time[0]: %u\r\n", NewTimerEvent.EventTime[0]);
-			printf("time[1]: %u\r\n", NewTimerEvent.EventTime[1]);
-			printf("time[2]: %u\r\n", NewTimerEvent.EventTime[2]);
-			printf("state: %u\r\n", NewTimerEvent.EventOutputState);
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetMode(argAsInt(2));
+				printf("Mode set to 0x%02X\r\n", argAsInt(2));
+			}
+			else
+			{
+				AD5933_GetMode(&dat);
+				printf("Mode is 0x%02X\r\n", dat);
+			}
 			break;
 
+		case 4:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetGain(argAsInt(2));
+				printf("Gain set to 0x%02X\r\n", argAsInt(2));
+			}
+			else
+			{
+				AD5933_ReadReg(AD5933_REG_CONTROL_HIGH, &dat);
+				printf("Gain is 0x%02X\r\n", dat);
+			}
+			break;
+
+		case 5:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetOutputVoltage(argAsInt(2));
+				printf("Output Voltage set to 0x%02X\r\n", argAsInt(2));
+			}
+			break;
+
+		case 6:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetClockSource(argAsInt(2));
+				printf("Clock set to 0x%02X\r\n", argAsInt(2));
+			}
+			else
+			{
+				AD5933_ReadReg(AD5933_REG_CONTROL_LOW, &dat);
+				printf("Low reg is 0x%02X\r\n", dat);
+			}
+			break;
+
+		case 7:
+			if(NumberOfArguments() > 1)
+			{
+				//AD5933_SetClockSource(argAsInt(2));
+				//printf("Clock set to 0x%02X\r\n", argAsInt(2));
+			}
+			else
+			{
+				printf("Clock code is 0x%06X\r\n", AD5933_CalcFrequency(30000.0, 16000.0));
+				//AD5933_ReadReg(AD5933_REG_CONTROL_LOW, &dat);
+				//printf("Low reg is 0x%02X\r\n", dat);
+			}
+			break;
+
+		case 8:
+			AD5933_GetStatus(&dat);
+			printf("Status is 0x%02X\r\n", dat);
+			break;
+
+		case 9:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetStartFreq(argAsInt(2));
+				printf("Start Frequency set to 0x%06X\r\n", argAsInt(2));
+			}
+			else
+			{
+				printf("Start frequency is 0x");
+
+				AD5933_ReadReg(AD5933_REG_START_FREQ_HIGH, &dat);
+				printf("%02X", dat);
+
+				AD5933_ReadReg(AD5933_REG_START_FREQ_MID, &dat);
+				printf("%02X", dat);
+
+				AD5933_ReadReg(AD5933_REG_START_FREQ_LOW, &dat);
+				printf("%02X\r\n", dat);
+			}
+			break;
+
+		case 10:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetFreqIncrement(argAsInt(2));
+				printf("Frequency Increment set to 0x%06X\r\n", argAsInt(2));
+			}
+			else
+			{
+				printf("Frequency increment is 0x");
+
+				AD5933_ReadReg(AD5933_REG_FREQ_INC_HIGH, &dat);
+				printf("%02X", dat);
+
+				AD5933_ReadReg(AD5933_REG_FREQ_INC_MID, &dat);
+				printf("%02X", dat);
+
+				AD5933_ReadReg(AD5933_REG_FREQ_INC_LOW, &dat);
+				printf("%02X\r\n", dat);
+			}
+			break;
+
+		case 11:
+			if(NumberOfArguments() > 1)
+			{
+				AD5933_SetNumberOfIncrements(argAsInt(2));
+				printf("Number of Increments set to 0x%04X\r\n", argAsInt(2));
+			}
+			else
+			{
+				printf("Number of increments is 0x");
+
+				AD5933_ReadReg(AD5933_REG_INC_NUMBER_HIGH, &dat);
+				printf("%02X", dat);
+
+				AD5933_ReadReg(AD5933_REG_INC_NUMBER_LOW, &dat);
+				printf("%02X\r\n", dat);
+			}
+			break;
 
 	}
-*/
+
 	return 0;
 }
 

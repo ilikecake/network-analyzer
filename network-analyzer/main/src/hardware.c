@@ -131,6 +131,9 @@ void App_HWInit(void)
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO, MUX_A1_PORT, MUX_A1_PIN);									//Set pin as output
 	Chip_GPIO_SetPinOutLow(LPC_GPIO, MUX_A1_PORT, MUX_A1_PIN);										//Initialize pin low
 
+	App_Analog_Power_Enable(1);
+
+
 	return;
 }
 
